@@ -13,7 +13,8 @@ app.add_middleware(
     CORSMiddleware,
 
     allow_origins=[
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "https://escape-game-woad-one.vercel.app"
     ],
 
     allow_credentials=True,

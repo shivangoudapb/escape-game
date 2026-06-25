@@ -3,6 +3,8 @@ import "./App.css";
 import { recordWin, getStats } from "./utils/stats";
 import { saveCurrentGame, loadCurrentGame, hasTodayBeenPlayed } from "./utils/currentGame";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [game, setGame] = useState(null);
   const [inputWord, setInputWord] = useState("");
@@ -40,7 +42,7 @@ function App() {
     }
 
     // No saved game for today — fetch a fresh one
-    fetch("http://127.0.0.1:8000/new-game", { method: "POST" })
+    fetch(`${API_URL}/new-game`, { method: "POST" })
       .then(response => response.json())
       .then(data => {
         setGame(data);
@@ -63,7 +65,7 @@ function App() {
       return;
     }
 
-    const response = await fetch("http://127.0.0.1:8000/move", {
+    const response = await fetch(`${API_URL}/move`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -830,9 +830,9 @@ body.light-mode .already-played-note {
   }
 
   .tile {
-    width: 52px;
-    height: 52px;
-    font-size: 28px;
+      width: 48px;
+      height: 48px;
+      font-size: 26px;
   }
 
   .tile-row {

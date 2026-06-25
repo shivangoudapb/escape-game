@@ -808,3 +808,72 @@ body.light-mode .win-divider {
 body.light-mode .already-played-note {
   color: #b0afaa;
 }
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .container {
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+
+  .title-tagline {
+    font-size: 10px;
+    margin-bottom: 14px;
+  }
+
+  .tile {
+    width: 52px;
+    height: 52px;
+    font-size: 28px;
+  }
+
+  .tile-row {
+    gap: 3px;
+  }
+
+  .board {
+    gap: 3px;
+  }
+
+  .keyboard {
+    gap: 5px;
+  }
+
+  .keyboard-row {
+    gap: 4px;
+  }
+
+  .key {
+    height: 46px;
+    min-width: 32px;
+    font-size: 12px;
+    padding: 0 8px;
+  }
+
+  .wide-key {
+    min-width: 60px;
+  }
+
+  .footer-buttons {
+    gap: 18px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .footer-button {
+    font-size: 11px;
+  }
+
+  .escaped-message {
+    font-size: 20px;
+    margin-top: 16px;
+  }
+}

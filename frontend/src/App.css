@@ -876,4 +876,14 @@ body.light-mode .already-played-note {
     font-size: 20px;
     margin-top: 16px;
   }
+
+  .game-area {
+    transform: scale(0.88);
+    transform-origin: top center;
+}
+
+.bottom-section {
+    transform: scale(0.88);
+    transform-origin: bottom center;
+}
 }

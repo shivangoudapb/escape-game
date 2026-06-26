@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- background -->
+  <rect width="32" height="32" fill="#121213"/>
+  <!-- door frame -->
+  <rect x="4" y="4" width="24" height="26" fill="#1a1a1c"/>
+  <!-- door left panel (closed side) -->
+  <rect x="4" y="4" width="10" height="26" fill="#232325"/>
+  <!-- orange light through the gap -->
+  <rect x="13" y="4" width="3" height="26" fill="#c2692a"/>
+  <!-- bright core -->
+  <rect x="14" y="4" width="1" height="26" fill="#e07a35"/>
+  <!-- door knob -->
+  <circle cx="12" cy="18" r="1" fill="#555558"/>
+  <!-- base sill -->
+  <rect x="4" y="30" width="24" height="2" fill="#2a2a2c"/>
+</svg>

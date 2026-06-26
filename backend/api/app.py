@@ -14,7 +14,7 @@ app.add_middleware(
 
     allow_origins=[
         "http://localhost:5173",
-        "https://escape-game-woad-one.vercel.app"
+        "https://playescape.vercel.app"
     ],
 
     allow_credentials=True,

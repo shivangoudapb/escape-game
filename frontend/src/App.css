@@ -37,7 +37,7 @@ a:focus-visible {
 }
 
 .game-area {
-  width: 100%;
+  width: min(100%, 760px);
   flex: 1;
   min-height: 0;
   display: flex;
@@ -797,20 +797,27 @@ h1 {
   }
 
   .game-toolbar {
-    align-self: flex-end;
-    gap: 5px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+    gap: 6px;
   }
 
   .toolbar-action {
     gap: 6px;
-    padding-inline: 9px;
+    padding-inline: 8px;
     font-size: 11px;
+  }
+
+  .toolbar-action:nth-child(1),
+  .toolbar-action:nth-child(2) {
+    width: 100%;
   }
 
   .board {
     gap: 5px;
     max-height: 52vh;
-    margin: clamp(20px, 3vh, 30px) 0 auto;
+    margin: 18px 0 auto;
   }
 
   .tile-row {

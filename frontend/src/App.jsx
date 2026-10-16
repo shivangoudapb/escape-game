@@ -457,7 +457,7 @@ function App() {
         {game.escaped && <h2 className="escaped-message">ESCAPED!</h2>}
       </div>
 
-      <div className="bottom-section">
+      <div className={`bottom-section${game.escaped ? " keyboard-hidden" : ""}`}>
         <div className="keyboard">
           <div className="keyboard-row">
             {"QWERTYUIOP".split("").map(letter => (

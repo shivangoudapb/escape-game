@@ -20,5 +20,8 @@ frontend/dist/
 # VS Code
 .vscode/
 
+# Local agent skills and instructions
+.agents/
+
 # Logs
 *.log

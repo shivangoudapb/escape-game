@@ -70,6 +70,7 @@ function App() {
   const [inputWord, setInputWord] = useState("");
   const [message, setMessage] = useState("");
   const [shake, setShake] = useState(false);
+  const [revealedMove, setRevealedMove] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -251,6 +252,13 @@ function App() {
     }
 
     const newState = data.state;
+    const changedLetterIndex = [...inputWord].findIndex(
+      (letter, index) => letter !== game.current_word[index],
+    );
+    setRevealedMove({
+      rowIndex: newState.history.length - 1,
+      letterIndex: changedLetterIndex,
+    });
     setGame(newState);
     saveCurrentGame(newState);
 
@@ -315,20 +323,24 @@ function App() {
               {word
                 .toUpperCase()
                 .split("")
-                .map((letter, letterIndex) => (
-                  <div
-                    key={letterIndex}
-                    className={
-                      rowIndex === 0
-                        ? "tile start-tile"
-                        : word[letterIndex] === game.start_word[letterIndex]
-                        ? "tile retained-tile"
-                        : "tile escaped-tile"
-                    }
-                  >
-                    {letter}
-                  </div>
-                ))}
+                .map((letter, letterIndex) => {
+                  const tileType = rowIndex === 0
+                    ? "start-tile"
+                    : word[letterIndex] === game.start_word[letterIndex]
+                    ? "retained-tile"
+                    : "escaped-tile";
+                  const shouldFlip = rowIndex === revealedMove?.rowIndex
+                    && letterIndex === revealedMove?.letterIndex;
+
+                  return (
+                    <div
+                      key={letterIndex}
+                      className={`tile ${tileType}${shouldFlip ? " flip-reveal" : ""}`}
+                    >
+                      {letter}
+                    </div>
+                  );
+                })}
             </div>
           ))}
 

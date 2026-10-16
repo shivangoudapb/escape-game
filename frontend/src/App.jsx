@@ -3,7 +3,23 @@ import "./App.css";
 import { getStats } from "./utils/stats";
 import { clearCurrentGame, saveCurrentGame, getSavedGameId } from "./utils/currentGame";
 
-const API_URL = import.meta.env.PROD ? "/api" : import.meta.env.VITE_API_URL;
+function getApiUrl() {
+  if (import.meta.env.PROD) return "/api";
+
+  const configuredUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  const apiUrl = new URL(configuredUrl, window.location.origin);
+  const isLoopbackHost = host => host === "localhost" || host === "127.0.0.1";
+
+  // localhost and 127.0.0.1 are different cookie sites in browsers. Keep a local
+  // API on the same loopback hostname as the page so its session cookie is sent.
+  if (isLoopbackHost(apiUrl.hostname) && isLoopbackHost(window.location.hostname)) {
+    apiUrl.hostname = window.location.hostname;
+  }
+
+  return `${apiUrl.origin}${apiUrl.pathname.replace(/\/$/, "")}`;
+}
+
+const API_URL = getApiUrl();
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1073055591607-ps26ttfq2pum84t7hp7t91ovieqh7u0u.apps.googleusercontent.com";
 let googleIdentityPromise;
 

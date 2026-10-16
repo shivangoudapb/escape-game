@@ -43,15 +43,126 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .title-bar {
+  position: relative;
+  z-index: 2;
+  width: 100%;
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.brand-lockup {
+  min-width: 0;
+}
+
+.game-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-action,
+.toolbar-more {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.toolbar-action:hover,
+.toolbar-more:hover,
+.toolbar-more[aria-expanded="true"] {
+  border-color: var(--color-border);
+  background: var(--color-hover-surface);
+  color: var(--color-ink);
+}
+
+.toolbar-action svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.more-options {
+  position: relative;
+}
+
+.toolbar-more {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.toolbar-more svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.more-options-panel {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 200px;
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.more-options-item {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.more-options-item:hover {
+  background: var(--color-hover-surface);
+}
+
+.more-options-divider {
+  height: 1px;
+  margin: 5px 8px;
+  background: var(--color-border-soft);
 }
 
 h1 {
@@ -247,43 +358,6 @@ h1 {
 
 .keyboard-row:last-child .wide-key:first-child:hover {
   background: var(--color-accent-hover);
-}
-
-.footer-buttons {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 12px;
-  padding-top: 9px;
-  border-top: 1px solid var(--color-border-soft);
-}
-
-.footer-button {
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--color-muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-decoration: none;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color 120ms ease, background-color 120ms ease;
-}
-
-.footer-button:hover {
-  background: var(--color-hover-surface);
-  color: var(--color-ink);
 }
 
 /* Dialogs */
@@ -712,7 +786,14 @@ h1 {
   }
 
   .title-bar {
-    margin-bottom: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .game-toolbar {
+    align-self: flex-end;
   }
 
   .board {
@@ -753,19 +834,6 @@ h1 {
     font-size: 10px;
   }
 
-  .footer-buttons {
-    gap: 2px;
-    margin-top: 9px;
-    padding-top: 7px;
-  }
-
-  .footer-button {
-    min-height: 34px;
-    padding-inline: 7px;
-    font-size: 10px;
-    letter-spacing: 0.045em;
-  }
-
   .modal {
     padding: 26px 22px 22px;
     border-radius: 16px;
@@ -792,11 +860,6 @@ h1 {
 
   .key {
     height: 46px;
-  }
-
-  .footer-button {
-    padding-inline: 5px;
-    font-size: 10px;
   }
 
   .modal {

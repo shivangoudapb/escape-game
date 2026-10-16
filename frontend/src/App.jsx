@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import { getStats } from "./utils/stats";
 import { clearCurrentGame, saveCurrentGame, getSavedGameId } from "./utils/currentGame";
@@ -81,6 +81,33 @@ function App() {
   const [showAccount, setShowAccount] = useState(false);
   const [account, setAccount] = useState(null);
   const [accountMessage, setAccountMessage] = useState("");
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const moreOptionsRef = useRef(null);
+  const moreOptionsButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!showMoreOptions) return undefined;
+
+    function handlePointerDown(event) {
+      if (!moreOptionsRef.current?.contains(event.target)) {
+        setShowMoreOptions(false);
+      }
+    }
+
+    function handleMenuKeyDown(event) {
+      if (event.key === "Escape") {
+        setShowMoreOptions(false);
+        moreOptionsButtonRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleMenuKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleMenuKeyDown);
+    };
+  }, [showMoreOptions]);
 
   useEffect(() => {
     if (darkMode) {
@@ -273,6 +300,7 @@ function App() {
   useEffect(() => {
     function handleKeyPress(event) {
       if (!game || game.escaped) return;
+      if (event.target instanceof Element && event.target.closest("button, a, input, textarea, select, [contenteditable='true']")) return;
       const key = event.key;
 
       if (/^[a-zA-Z]$/.test(key)) {
@@ -310,10 +338,81 @@ function App() {
     <div className="container">
       <div className="game-area">
 
-        <div className="title-bar">
-          <h1>ESCAPE</h1>
-          <p className="title-tagline">escape the word</p>
-        </div>
+        <header className="title-bar">
+          <div className="brand-lockup">
+            <h1>ESCAPE</h1>
+            <p className="title-tagline">escape the word</p>
+          </div>
+
+          <nav className="game-toolbar" aria-label="Game options">
+            <button
+              className="toolbar-action"
+              onClick={() => setShowHelp(true)}
+              aria-label="How to play"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="10" r="7.25" />
+                <path d="M7.9 7.5a2.15 2.15 0 1 1 3.58 1.6c-.85.72-1.48 1.1-1.48 2.4" />
+                <circle cx="10" cy="14.25" r="0.65" fill="currentColor" stroke="none" />
+              </svg>
+              <span>How to play</span>
+            </button>
+            <button
+              className="toolbar-action"
+              onClick={() => setShowStats(true)}
+              aria-label="Stats"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M3.5 16.25h13M5 14V9.5h2.75V14M8.75 14V5.75h2.75V14M12.5 14V7.5h2.75V14" />
+              </svg>
+              <span>Stats</span>
+            </button>
+            <div className="more-options" ref={moreOptionsRef}>
+              <button
+                ref={moreOptionsButtonRef}
+                className="toolbar-more"
+                onClick={() => setShowMoreOptions(open => !open)}
+                aria-label="More options"
+                aria-expanded={showMoreOptions}
+                aria-controls="more-options-panel"
+                title="More options"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <circle cx="4" cy="10" r="1.25" />
+                  <circle cx="10" cy="10" r="1.25" />
+                  <circle cx="16" cy="10" r="1.25" />
+                </svg>
+              </button>
+              {showMoreOptions && (
+                <div className="more-options-panel" id="more-options-panel" aria-label="More options">
+                  <button
+                    className="more-options-item"
+                    onClick={() => {
+                      setShowMoreOptions(false);
+                      setAccountMessage("");
+                      setShowAccount(true);
+                    }}
+                  >
+                    {account ? "Account" : "Sign in"}
+                  </button>
+                  <button
+                    className="more-options-item"
+                    onClick={() => {
+                      setShowMoreOptions(false);
+                      setShowSettings(true);
+                    }}
+                  >
+                    Settings
+                  </button>
+                  <div className="more-options-divider" />
+                  <a className="more-options-item" href="/privacy.html">
+                    Privacy policy
+                  </a>
+                </div>
+              )}
+            </div>
+          </nav>
+        </header>
 
         <div className="message">{message}</div>
 
@@ -417,23 +516,6 @@ function App() {
           </div>
         </div>
 
-        <div className="footer-buttons">
-          <button className="footer-button" onClick={() => setShowHelp(true)}>
-            How To Play
-          </button>
-          <button className="footer-button" onClick={() => setShowStats(true)}>
-            Stats
-          </button>
-          <button className="footer-button" onClick={() => { setAccountMessage(""); setShowAccount(true); }}>
-            {account ? "Account" : "Sign in"}
-          </button>
-          <button className="footer-button" onClick={() => setShowSettings(true)}>
-            Settings
-          </button>
-          <a className="footer-button footer-link" href="/privacy.html">
-            Privacy
-          </a>
-        </div>
       </div>
 
       {/* HOW TO PLAY MODAL */}

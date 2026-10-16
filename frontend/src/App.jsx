@@ -4,7 +4,7 @@ import { getStats } from "./utils/stats";
 import { clearCurrentGame, saveCurrentGame, getSavedGameId } from "./utils/currentGame";
 
 const API_URL = import.meta.env.PROD ? "/api" : import.meta.env.VITE_API_URL;
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "1073055591607-ps26ttfq2pum84t7hp7t91ovieqh7u0u.apps.googleusercontent.com";
 let googleIdentityPromise;
 
 function apiFetch(path, options = {}) {

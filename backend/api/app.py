@@ -262,7 +262,10 @@ def google_login(
     x_escape_request: str | None = Header(default=None),
 ):
     require_request_marker(x_escape_request)
-    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_id = os.getenv(
+        "GOOGLE_CLIENT_ID",
+        "1073055591607-ps26ttfq2pum84t7hp7t91ovieqh7u0u.apps.googleusercontent.com",
+    )
     if not client_id:
         raise HTTPException(status_code=503, detail="Google sign-in is not configured yet.")
 

@@ -10,19 +10,17 @@ Service with:
 - Build command: `pip install -r backend/requirements.txt`
 - Start command: `uvicorn backend.api.app:app --host 0.0.0.0 --port $PORT`
 - Health check path: `/health`
-- Persistent disk mount path: `/var/data`
 - `APP_ENV=production`
 - `CORS_ORIGINS=https://playescape.vercel.app`
-- `ESCAPE_DATABASE_PATH=/var/data/escape.sqlite3`
 - `GOOGLE_CLIENT_ID=<your Google OAuth web client ID>`
 
-Render's default filesystem is ephemeral. The app detects Render's `RENDER=true`
-environment, applies secure production cookies, allows the known Vercel origin
-by default, and refuses to start unless the database is under a mounted disk.
-Configure the disk in the existing service's Render dashboard; a persistent
-disk requires a paid Render web-service plan. Do not sync a Blueprint that
-creates another service or disk unless you intend to replace the existing
-service.
+Render's free filesystem is ephemeral. Without `ESCAPE_DATABASE_PATH`, the
+database is stored under `/tmp/escape.sqlite3` so the free service can start;
+game history and accounts can be lost when Render restarts or redeploys it.
+For durable data, attach a persistent disk and set
+`ESCAPE_DATABASE_PATH=/var/data/escape.sqlite3`; a persistent disk requires a
+paid Render web-service plan. Do not sync a Blueprint that creates another
+service or disk unless you intend to replace the existing service.
 
 The repository-root `.python-version` pins the runtime to Python 3.12.11.
 SQLite is suitable for this single-instance deployment. Render disks are
@@ -48,8 +46,9 @@ to Render. This keeps session cookies first-party in the browser; Render's
 
 ## Database and game sessions
 
-Development defaults to `backend/escape.sqlite3`. In production,
-`ESCAPE_DATABASE_PATH` must be an absolute path under the mounted Render disk.
+Development defaults to `backend/escape.sqlite3`. In production, a configured
+`ESCAPE_DATABASE_PATH` must be absolute. Render's free filesystem uses an
+ephemeral database by default.
 The browser receives an anonymous session cookie, and completed games are
 tracked for that browser. Signing in links guest history to a Google account so
 stats can be recovered on another device. Account identity uses Google's
@@ -64,6 +63,5 @@ profile, sessions, games, and results from the application database.
 
 ## Privacy notice
 
-The published notice is at `/privacy.html` and linked in the game footer. Add
-the operator's support/privacy contact address to the Questions section before
-public launch.
+The published notice is at `/privacy.html` and linked in the game footer. The
+support/privacy contact address is configured in the notice.

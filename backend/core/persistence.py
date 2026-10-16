@@ -19,7 +19,8 @@ def database_path():
     if configured_path:
         return Path(configured_path).expanduser().resolve()
     if os.getenv("RENDER", "").lower() == "true":
-        return Path("/var/data/escape.sqlite3")
+        # Render's free filesystem is writable but ephemeral across restarts/deploys.
+        return Path("/tmp/escape.sqlite3")
     return PROJECT_ROOT / "backend" / "escape.sqlite3"
 
 

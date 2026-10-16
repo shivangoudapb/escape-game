@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
@@ -50,16 +49,6 @@ if IS_PRODUCTION:
     configured_database_path = database_path()
     if not os.path.isabs(str(configured_database_path)):
         raise RuntimeError("ESCAPE_DATABASE_PATH must be an absolute path in production.")
-    if IS_RENDER:
-        has_persistent_mount = any(
-            os.path.ismount(str(parent))
-            for parent in (Path(configured_database_path).parent, *Path(configured_database_path).parent.parents)
-            if str(parent) != os.path.abspath(os.sep)
-        )
-        if not has_persistent_mount:
-            raise RuntimeError(
-                "Attach a Render persistent disk and set ESCAPE_DATABASE_PATH inside its mount path."
-            )
     for origin in CORS_ORIGINS:
         parsed_origin = urlsplit(origin)
         if (

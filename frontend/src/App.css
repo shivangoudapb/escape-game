@@ -250,6 +250,10 @@ h1 {
   transition: color 0.15s;
 }
 
+.footer-link {
+  text-decoration: none;
+}
+
 .footer-button:hover {
   color: #9a9b9c;
 }
@@ -289,6 +293,54 @@ h1 {
 
 .modal-stats::-webkit-scrollbar {
   display: none;
+}
+
+.account-copy {
+  margin: 20px 0;
+  color: #9a9b9c;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.account-copy strong {
+  color: #ffffff;
+}
+
+.google-sign-in-button {
+  display: flex;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 24px;
+}
+
+.account-action {
+  width: 100%;
+  margin-top: 12px;
+  padding: 11px 14px;
+  background: transparent;
+  border: 1px solid #3a3a3c;
+  color: #d7dadc;
+  font: inherit;
+  cursor: pointer;
+}
+
+.account-action:hover {
+  border-color: #8a8a8c;
+}
+
+.account-delete {
+  color: #e58e82;
+}
+
+.account-message {
+  min-height: 20px;
+  margin: 16px 0 0;
+  color: #9a9b9c;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
 }
 
 /* =========================
@@ -685,6 +737,24 @@ body.light-mode .modal {
   border-color: #d0cfc9;
 }
 
+body.light-mode .account-copy,
+body.light-mode .account-message {
+  color: #6a6a65;
+}
+
+body.light-mode .account-copy strong {
+  color: #1a1a1a;
+}
+
+body.light-mode .account-action {
+  color: #292927;
+  border-color: #d0cfc9;
+}
+
+body.light-mode .account-delete {
+  color: #a43c32;
+}
+
 body.light-mode .close-button {
   color: #c0bfba;
 }
@@ -863,7 +933,9 @@ body.light-mode .already-played-note {
   }
 
   .footer-buttons {
-    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 10px;
     margin-bottom: 10px;
   }

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index,follow" />
+    <title>Privacy Notice — Escape</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; background: #111; color: #eee; }
+      body { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; line-height: 1.65; }
+      h1, h2 { line-height: 1.2; }
+      h1 { letter-spacing: .08em; text-transform: uppercase; }
+      h2 { margin-top: 2em; font-size: 1.15rem; }
+      a { color: #f0a530; }
+      .updated { color: #aaa; }
+      .back { display: inline-block; margin-bottom: 24px; }
+    </style>
+  </head>
+  <body>
+    <a class="back" href="/">← Back to Escape</a>
+    <h1>Privacy Notice</h1>
+    <p class="updated">Last updated: October 16, 2026</p>
+    <p>This notice explains what Escape stores when you play, including when you choose to sign in with Google.</p>
+
+    <h2>Information we store</h2>
+    <ul>
+      <li><strong>Anonymous play:</strong> a random player identifier, your current and completed game history, and game results. A necessary, HttpOnly session cookie keeps your browser connected to that anonymous player.</li>
+      <li><strong>Google sign-in (optional):</strong> Google’s stable account identifier, verified email address, display name, and profile photo URL when Google provides them. We do not receive or store your Google password.</li>
+      <li><strong>Game history:</strong> puzzle date, starting and ending words, moves, and the move sequence needed to resume and calculate stats.</li>
+      <li><strong>Session security:</strong> a hash of the session token and its expiration time. The raw session token is held in the HttpOnly cookie and is not stored in the database.</li>
+    </ul>
+
+    <h2>How we use it</h2>
+    <p>We use this information to run the game, resume play, display stats, connect anonymous progress to your account when you sign in, and protect account sessions. We do not use it for advertising.</p>
+
+    <h2>Cookies and browser storage</h2>
+    <p>The Escape session cookie is necessary for anonymous and signed-in play. Anonymous session cookies expire after one year; signed-in session cookies expire after 30 days. The browser also stores the current game ID in local storage so the game can resume after a refresh. Older installations may have legacy stats cached in local storage.</p>
+
+    <h2>Retention and deletion</h2>
+    <p>Signed-in game history remains associated with your account until you delete the account. Use <strong>Account → Delete account and saved progress</strong> in the game to remove the account profile, sessions, games, and results from the application database.</p>
+    <p>Anonymous game data is retained while its one-year session is active. Expired anonymous session credentials and associated game records are removed during subsequent API requests. Clearing browser storage removes the local game ID, but does not immediately delete server-side data.</p>
+
+    <h2>Google and hosting providers</h2>
+    <p>Google Identity Services handles the sign-in prompt. Escape sends the resulting ID token to its API, which verifies it with Google and then discards the token. Google’s processing is governed by <a href="https://policies.google.com/privacy" rel="noreferrer">Google’s Privacy Policy</a>.</p>
+    <p>The hosting providers that serve the frontend and API may process standard request and security logs, such as IP address and request time, under their own privacy policies. The game does not add an analytics or advertising tracker.</p>
+
+    <h2>Questions</h2>
+    <p>There is no dedicated support contact configured for this game yet. You can delete a signed-in account and its saved data from the Account panel. A contact address should be added here before public launch.</p>
+  </body>
+</html>

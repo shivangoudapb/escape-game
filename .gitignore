@@ -2,6 +2,10 @@
 venv/
 __pycache__/
 *.pyc
+backend/escape.sqlite3
+backend/escape.sqlite3-shm
+backend/escape.sqlite3-wal
+backend/.runtime-deps*/
 
 # Environment variables
 .env

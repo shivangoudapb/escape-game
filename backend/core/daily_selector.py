@@ -1,11 +1,14 @@
 import random
 import pandas as pd
+from pathlib import Path
 
 from datetime import (
     date,
     datetime,
     timezone
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 # Change this ONCE when the game launches.
@@ -23,7 +26,7 @@ SHUFFLE_SEED = 42
 def load_candidates():
 
     df = pd.read_csv(
-        "data/processed/candidate_words.csv"
+        PROJECT_ROOT / "data" / "processed" / "candidate_words.csv"
     )
 
     return (
@@ -90,6 +93,21 @@ def get_daily_word():
     )
 
     return words[index]
+
+
+def get_daily_puzzle():
+    """Return the canonical UTC puzzle date and its starting word."""
+    puzzle_date = get_utc_date()
+    words = get_shuffled_words()
+    day_number = (puzzle_date - LAUNCH_DATE).days
+
+    if day_number < 0:
+        raise ValueError("Launch date is in the future.")
+
+    return {
+        "puzzle_date": puzzle_date.isoformat(),
+        "word": words[day_number % len(words)],
+    }
 
 
 def main():

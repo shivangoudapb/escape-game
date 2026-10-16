@@ -1,9 +1,53 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
-import { recordWin, getStats } from "./utils/stats";
-import { saveCurrentGame, loadCurrentGame, hasTodayBeenPlayed } from "./utils/currentGame";
+import { getStats } from "./utils/stats";
+import { clearCurrentGame, saveCurrentGame, getSavedGameId } from "./utils/currentGame";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.PROD ? "/api" : import.meta.env.VITE_API_URL;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+let googleIdentityPromise;
+
+function apiFetch(path, options = {}) {
+  return fetch(`${API_URL}${path}`, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "X-Escape-Request": "1",
+      ...options.headers,
+    },
+  });
+}
+
+function loadGoogleIdentity() {
+  if (window.google?.accounts?.id) return Promise.resolve();
+  if (googleIdentityPromise) return googleIdentityPromise;
+
+  googleIdentityPromise = new Promise((resolve, reject) => {
+    let script = document.getElementById("google-identity-services");
+    const shouldAppend = !script;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = "google-identity-services";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+    }
+    script.addEventListener("load", () => {
+      if (window.google?.accounts?.id) resolve();
+      else {
+        googleIdentityPromise = undefined;
+        reject(new Error("Google Identity Services did not initialize."));
+      }
+    }, { once: true });
+    script.addEventListener("error", () => {
+      script.remove();
+      googleIdentityPromise = undefined;
+      reject(new Error("Google Identity Services failed to load."));
+    }, { once: true });
+    if (shouldAppend) document.head.appendChild(script);
+  });
+  return googleIdentityPromise;
+}
 
 function App() {
   const [game, setGame] = useState(null);
@@ -17,6 +61,9 @@ function App() {
   const [stats, setStats] = useState(getStats());
   const [copied, setCopied] = useState(false);
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [account, setAccount] = useState(null);
+  const [accountMessage, setAccountMessage] = useState("");
 
   useEffect(() => {
     if (darkMode) {
@@ -27,56 +74,159 @@ function App() {
   }, [darkMode]);
 
   useEffect(() => {
-    // Check for a saved game from today first
-    const saved = loadCurrentGame();
-
-    if (saved) {
-      // Resume exactly where they left off (mid-game or completed)
-      setGame(saved);
-      if (saved.escaped) {
-        // Already completed today — show stats immediately
-        setAlreadyPlayed(true);
-        setShowStats(true);
-      }
-      return;
-    }
-
-    // No saved game for today — fetch a fresh one
-    fetch(`${API_URL}/new-game`, { method: "POST" })
-      .then(response => response.json())
+    apiFetch("/new-game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ game_id: getSavedGameId() }),
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Could not load today's puzzle.");
+        return response.json();
+      })
       .then(data => {
         setGame(data);
         saveCurrentGame(data);
-      });
+        if (data.escaped) {
+          setAlreadyPlayed(true);
+          setShowStats(true);
+        }
+        return Promise.all([
+          apiFetch("/auth/me").then(response => response.json()),
+          apiFetch("/stats").then(response => response.json()),
+        ]);
+      })
+      .then(([authData, statsData]) => {
+        setAccount(authData.authenticated ? authData.user : null);
+        setStats(statsData);
+      })
+      .catch(() => setMessage("Could not load today's puzzle. Please refresh to try again."));
   }, []);
 
-  function triggerError(text) {
+  useEffect(() => {
+    if (!showAccount || !GOOGLE_CLIENT_ID) return undefined;
+    let active = true;
+
+    loadGoogleIdentity()
+      .then(() => {
+        if (!active) return;
+        const button = document.getElementById("google-sign-in-button");
+        if (!button) return;
+        button.replaceChildren();
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: async ({ credential }) => {
+            setAccountMessage("Signing in...");
+            try {
+              const response = await apiFetch("/auth/google", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential }),
+              });
+              const data = await response.json();
+              if (!response.ok) throw new Error(data.detail || "Google sign-in failed.");
+              setAccount(data.user);
+              setAccountMessage("Your progress is now linked to your Google account.");
+              const statsResponse = await apiFetch("/stats");
+              if (statsResponse.ok) setStats(await statsResponse.json());
+            } catch (error) {
+              setAccountMessage(error.message || "Google sign-in failed. Please try again.");
+            }
+          },
+          auto_select: false,
+        });
+        window.google.accounts.id.renderButton(button, {
+          theme: darkMode ? "filled_black" : "outline",
+          size: "large",
+          shape: "rectangular",
+          text: "continue_with",
+          width: 280,
+        });
+      })
+      .catch(() => setAccountMessage("Google sign-in could not load. Check your connection and try again."));
+
+    return () => { active = false; };
+  }, [showAccount, darkMode]);
+
+  const refreshStats = useCallback(async () => {
+    const response = await apiFetch("/stats");
+    if (response.ok) setStats(await response.json());
+  }, []);
+
+  async function startAnonymousGame() {
+    clearCurrentGame();
+    const response = await apiFetch("/new-game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ game_id: null }),
+    });
+    if (!response.ok) throw new Error("Could not start an anonymous game.");
+    const newGame = await response.json();
+    setGame(newGame);
+    saveCurrentGame(newGame);
+    setAlreadyPlayed(false);
+    await refreshStats();
+  }
+
+  async function signOut() {
+    try {
+      const response = await apiFetch("/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Could not sign out.");
+      setAccount(null);
+      setAccountMessage("You are signed out. You can keep playing anonymously.");
+      await startAnonymousGame();
+    } catch (error) {
+      setAccountMessage(error.message || "Could not sign out. Please try again.");
+    }
+  }
+
+  async function deleteAccount() {
+    const confirmed = window.confirm(
+      "Delete your Google-linked account and all saved game results? This cannot be undone.",
+    );
+    if (!confirmed) return;
+    try {
+      const response = await apiFetch("/auth/account", { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Could not delete the account.");
+      setAccount(null);
+      setAccountMessage("Your account and saved results were deleted. You can keep playing anonymously.");
+      await startAnonymousGame();
+    } catch (error) {
+      setAccountMessage(error.message || "Could not delete the account. Please try again.");
+    }
+  }
+
+  const triggerError = useCallback((text) => {
     setInputWord("");
     setMessage(text);
     setShake(true);
     setTimeout(() => setShake(false), 500);
     setTimeout(() => setMessage(""), 2000);
-  }
+  }, []);
 
-  async function submitMove() {
+  const submitMove = useCallback(async () => {
     if (!game || game.escaped) return;
     if (inputWord.length !== 5) {
       triggerError("Word must be 5 letters.");
       return;
     }
 
-    const response = await fetch(`${API_URL}/move`, {
+    const response = await apiFetch("/move", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        start_word: game.start_word,
-        current_word: game.current_word,
-        moves: game.moves,
-        history: game.history,
+        game_id: game.game_id,
+        expected_moves: game.moves,
+        expected_current_word: game.current_word,
         next_word: inputWord.toLowerCase(),
       }),
     });
 
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      triggerError(error.detail || "Could not submit move. Please try again.");
+      return;
+    }
     const data = await response.json();
 
     if (!data.success) {
@@ -89,13 +239,12 @@ function App() {
     saveCurrentGame(newState);
 
     if (newState.escaped) {
-      recordWin(newState.moves);
-      setStats(getStats());
+      await refreshStats();
       setTimeout(() => setShowStats(true), 800);
     }
 
     setInputWord("");
-  }
+  }, [game, inputWord, refreshStats, triggerError]);
 
   useEffect(() => {
     function handleKeyPress(event) {
@@ -115,7 +264,7 @@ function App() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [game, inputWord]);
+  }, [game, inputWord, submitMove]);
 
   function handleShare() {
     if (!game) return;
@@ -129,7 +278,7 @@ function App() {
     });
   }
 
-  if (!game) return <h2>Loading...</h2>;
+  if (!game) return <h2>{message || "Loading..."}</h2>;
 
   const maxCount = Math.max(1, ...Object.values(stats.distribution));
 
@@ -247,9 +396,15 @@ function App() {
           <button className="footer-button" onClick={() => setShowStats(true)}>
             Stats
           </button>
+          <button className="footer-button" onClick={() => { setAccountMessage(""); setShowAccount(true); }}>
+            {account ? "Account" : "Sign in"}
+          </button>
           <button className="footer-button" onClick={() => setShowSettings(true)}>
             Settings
           </button>
+          <a className="footer-button footer-link" href="/privacy.html">
+            Privacy
+          </a>
         </div>
       </div>
 
@@ -361,6 +516,32 @@ function App() {
       )}
 
       {/* SETTINGS MODAL */}
+      {showAccount && (
+        <div className="modal-overlay">
+          <div className="modal modal-account">
+            <button className="close-button" onClick={() => setShowAccount(false)}>✕</button>
+            <h2 className="help-title">YOUR ACCOUNT</h2>
+            {account ? (
+              <>
+                <p className="account-copy">Signed in as <strong>{account.email}</strong>. Your completed puzzles are saved to this account.</p>
+                <button className="account-action" onClick={signOut}>Sign out</button>
+                <button className="account-action account-delete" onClick={deleteAccount}>Delete account and saved progress</button>
+              </>
+            ) : (
+              <>
+                <p className="account-copy">Sign in with Google to keep your stats and completed puzzles across devices. You can play without signing in.</p>
+                {GOOGLE_CLIENT_ID ? (
+                  <div id="google-sign-in-button" className="google-sign-in-button" />
+                ) : (
+                  <p className="account-copy">Google sign-in is not configured yet.</p>
+                )}
+              </>
+            )}
+            <p className="account-message" role="status">{accountMessage}</p>
+          </div>
+        </div>
+      )}
+
       {showSettings && (
         <div className="modal-overlay">
           <div className="modal">
